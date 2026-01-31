@@ -1,0 +1,119 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Interactive Romantic Video</title>
+<style>
+body { font-family: Arial,sans-serif; background:#f4f4f4; text-align:center; padding:20px; }
+video { max-width:100%; border-radius:10px; }
+#quizBox { display:none; margin-top:20px; background:white; padding:20px; border-radius:10px; box-shadow:0 4px 10px rgba(0,0,0,0.1); }
+.option { display:block; margin:10px auto; padding:12px; width:80%; border:none; border-radius:5px; background:#007bff; color:white; font-size:16px; cursor:pointer; }
+.option:hover { background:#0056b3; }
+#romanticEnd { display:none; margin-top:30px; background:white; padding:30px; border-radius:20px; animation:fadeIn 2s ease; }
+#romanticEnd h2 { font-size:28px; margin-bottom:10px; }
+#romanticEnd p { font-size:18px; color:#555; }
+.flowers { font-size:34px; margin-top:20px; animation:float 3s infinite ease-in-out; }
+#petals-container { position: fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; overflow:hidden; z-index:999; }
+.petal { position:absolute; top:-10%; font-size:22px; opacity:0.9; animation:fall linear infinite; }
+@keyframes fadeIn { from{opacity:0;} to{opacity:1;} }
+@keyframes float {0%{transform:translateY(0);}50%{transform:translateY(-10px);}100%{transform:translateY(0);}}
+@keyframes fall {0%{transform:translateX(0) translateY(0) rotate(0deg); opacity:1;}100%{transform:translateX(40px) translateY(110vh) rotate(360deg); opacity:0.2;}}
+</style>
+</head>
+<body>
+
+<h2>Interactive Romantic Video</h2>
+<video id="myVideo" controls>
+<source src="video.mp4" type="video/mp4">
+</video>
+
+<div id="quizBox"></div>
+
+<div id="romanticEnd">
+<h2>For You ❤️</h2>
+<p>No matter the answer… I’m glad it’s you.</p>
+<div class="flowers">🌸 🌹 🌷 🌺 💐</div>
+</div>
+
+<div id="petals-container"></div>
+
+<audio id="bgMusic" src="romantic-piano.mp3"></audio>
+
+<script>
+const video = document.getElementById("myVideo");
+const quizBox = document.getElementById("quizBox");
+let selectedAnswers = [];
+const questions = [
+  {time:6, question:"What day of the week do you like the most?", options:["Sunday","Monday","Saturday","Friday"]},
+  {time:14, question:"What type of beverage do you like?", options:["Chai ☕","Coffee ☕","Juice 🧃","All of the above ❤️"]},
+  {time:22, question:"What meal do you like the most?", options:["Lunch","Dinner","Breakfast","Brunch 🥐"]},
+  {time:30, question:"", options:["Yes ❤️","A 😊","B 😉","C 😄"]}
+];
+let currentQuestion = -1;
+
+video.addEventListener("timeupdate",()=>{
+  if(currentQuestion+1<questions.length && video.currentTime>=questions[currentQuestion+1].time){
+    video.pause();
+    showQuestion(currentQuestion+1);
+  }
+});
+
+function showQuestion(index){
+  currentQuestion=index;
+  if(index===3){
+    const day=selectedAnswers[0]; const drink=selectedAnswers[1]; const meal=selectedAnswers[2];
+    questions[index].question=\`Would you like to go on a \${day} \${drink} \${meal} with me? 💕\`;
+  }
+  quizBox.innerHTML=\`<h3>\${questions[index].question}</h3>\`;
+  questions[index].options.forEach(opt=>{
+    const btn=document.createElement("button");
+    btn.className="option";
+    btn.innerText=opt;
+    btn.onclick=()=>{
+      if(index<3) selectedAnswers[index]=opt;
+      continueVideo();
+    };
+    quizBox.appendChild(btn);
+  });
+  quizBox.style.display="block";
+}
+
+function continueVideo(){
+  quizBox.style.display="none";
+  if(currentQuestion===questions.length-1){
+    video.pause();
+    video.style.display="none";
+    document.getElementById("romanticEnd").style.display="block";
+    startPetals();
+    playMusicWithFadeIn();
+  } else video.play();
+}
+
+function startPetals(){
+  const container=document.getElementById("petals-container");
+  for(let i=0;i<25;i++){
+    const petal=document.createElement("div");
+    petal.className="petal"; petal.innerText="🌹";
+    petal.style.left=Math.random()*100+"vw";
+    petal.style.animationDuration=4+Math.random()*4+"s";
+    petal.style.animationDelay=Math.random()*2+"s";
+    container.appendChild(petal);
+  }
+}
+
+function playMusicWithFadeIn(){
+  const music=document.getElementById("bgMusic");
+  music.volume=0;
+  music.play();
+  let volume=0;
+  const fade=setInterval(()=>{
+    volume+=0.02;
+    if(volume>=0.6){volume=0.6; clearInterval(fade);}
+    music.volume=volume;
+  },200);
+}
+</script>
+
+</body>
+</html>
